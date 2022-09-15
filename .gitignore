@@ -10,6 +10,12 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
+# Rider
+/.idea/
+
+# User Settings
+/[Uu]serSettings/
+
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
 
