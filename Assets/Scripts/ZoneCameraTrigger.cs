@@ -1,15 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterBase : LivingThing
+public class ZoneCameraTrigger : MonoBehaviour
 {
 
     [SerializeField]
-    protected float m_fMoveSpeed = 0.5f;
+    public Camera m_cCamera;
     
     [SerializeField]
-    protected Rigidbody2D m_cRigidBody;
+    public int m_iZoneHeight;
     
     // Start is called before the first frame update
     void Start()
@@ -21,5 +22,10 @@ public class CharacterBase : LivingThing
     void Update()
     {
         
+    }
+
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        m_cCamera.transform.SetPositionAndRotation(Vector3.up * m_iZoneHeight, Quaternion.identity);
     }
 }
