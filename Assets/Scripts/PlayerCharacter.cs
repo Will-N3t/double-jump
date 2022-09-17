@@ -6,82 +6,93 @@ using UnityEngine.InputSystem;
 
 public class PlayerCharacter : CharacterBase
 {
-    private float m_fLeftOrRight = 0;
+    private Vector2 m_vMovement = Vector2.zero;
 
     [SerializeField]
-    private float m_fJumpForce = 500;
+    private float m_fJumpForce = 1.5f;
     
     [SerializeField]
-    private CapsuleCollider2D feet;
-    
-    private bool m_bFalling = false;
-    
-    private int m_iLevel = 0;
-
-    private int m_iLevelSize = 10;
+    private CapsuleCollider2D feet1;
+    [SerializeField]
+    private CapsuleCollider2D feet2;
 
     [SerializeField]
-    private Camera m_cCamera;
+    private float m_fMaxJumpTime = 0.3f;
+    [SerializeField]
+    private float m_fMinJumpTime = 0.2f;
+    private float m_fJumpTime = 0f;
+    
+    [SerializeField]
+    private bool m_bDEBUGInfinityJump = false;
+    private bool m_bJumpPressed = false;
+    private bool m_bJump = false;
+    private bool m_bFeetOnFloor = false;
+    
+    [SerializeField]
+    private SpriteRenderer m_cMirrorSprite;
 
-    public void Jump()
+    [SerializeField]
+    private AudioSource m_cJumpSound;
+    
+
+    public void Jump(InputAction.CallbackContext context)
     {
-        Debug.Log("Jump?");
+        bool jumpButton = context.ReadValueAsButton();
         
-        if (!m_bFalling)
+        // Start Jump
+        if ((m_bFeetOnFloor || m_bDEBUGInfinityJump) && !m_bJump && !m_bJumpPressed && jumpButton)
         {
-            Debug.Log("Jump!");
-            m_cRigidBody.AddForce(Vector3.up * m_fJumpForce);
+            m_cJumpSound.Play();
+            m_bJump = true;
+            m_fJumpTime = m_fMaxJumpTime;
         }
+
+        m_bJumpPressed = jumpButton;
     }
         
     // Start is called before the first frame update
     void Start()
     {
-        
+        m_cJumpSound.clip.LoadAudioData();
     }
 
     public void PlayerMove(InputAction.CallbackContext context)
     {
-        var v = context.ReadValue<Vector2>();
-
-        m_fLeftOrRight = v.x;
-
-        if (v.y >= 0.9f)
-        {
-            Jump();
-        }
+        m_vMovement = context.ReadValue<Vector2>();
     }
 
     // Update is called once per frame
-    void Update()
+    new void Update()
     {
         // Add movement force
-        m_cRigidBody.AddForce(Vector2.right * (m_fMoveSpeed * m_fLeftOrRight));
+        m_cRigidBody.AddForce(Vector2.right * (m_fMoveSpeed * m_vMovement.x));
         
-        // Update Cam
-        if (m_iLevel != GetLevelFromPosition())
+        // Add jump force
+        if (m_bJump)
         {
-            m_iLevel = GetLevelFromPosition();
-            m_cCamera.transform.SetPositionAndRotation(new Vector3(0, m_iLevel*m_iLevelSize, -10), Quaternion.identity);
+            // Decrease the jump time thus far
+            m_fJumpTime -= Time.deltaTime;
             
-            Debug.Log("New Level: " + m_iLevel);
-        }
-    }
+            if (m_fJumpTime <= 0)
+            {
+                m_bJump = false;
+            }
 
-    private int GetLevelFromPosition()
-    {
-        return Mathf.FloorToInt((m_cRigidBody.position.y + (m_iLevelSize/2f)) / m_iLevelSize);
-    }
-    
-    void OnCollisionStay2D(Collision2D collisionInfo)
-    {
-        m_bFalling = collisionInfo.contacts.Length == 0;
-        Debug.Log("Collisions: " + collisionInfo.contacts.Length);
-        
-        // Debug-draw all contact points and normals
-        foreach (ContactPoint2D contact in collisionInfo.contacts)
-        {
-            Debug.DrawRay(contact.point, contact.normal * 10, Color.green);
+            // Jump for a minimum amount
+            if (!m_bJumpPressed && (m_fMaxJumpTime - m_fJumpTime) > m_fMinJumpTime)
+            {
+                m_bJump = false;
+            }
+            
+            m_cRigidBody.AddForce(Vector3.up * m_fJumpForce * (m_fJumpTime/m_fMaxJumpTime));
         }
+        
+        // Feet
+        m_bFeetOnFloor = feet1.IsTouchingLayers() || feet2.IsTouchingLayers();
+        
+        // Animation
+        base.Update();
+        m_cMirrorSprite.sprite = m_cSprite.sprite;
+        m_cMirrorSprite.flipX = m_cSprite.flipX;
     }
 }

@@ -49,8 +49,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_iHealth: 50
-  m_iMoveSpeed: 10
+  m_fMoveSpeed: 0.5
   m_cRigidBody: {fileID: 7611267880116594884}
+  m_cSprite: {fileID: 4945812698677263504}
+  m_cNormalSprite: {fileID: 0}
+  m_cWalkSprite: {fileID: 0}
+  m_cJumpSprite: {fileID: 0}
+  m_cFallSprite: {fileID: 0}
 --- !u!70 &6520486188721053155
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
