@@ -33,6 +33,8 @@ public class PlayerCharacter : CharacterBase
 
     [SerializeField]
     private AudioSource m_cJumpSound;
+    [SerializeField]
+    private AudioSource m_cHitSound;
     
 
     public void Jump(InputAction.CallbackContext context)
@@ -54,6 +56,7 @@ public class PlayerCharacter : CharacterBase
     void Start()
     {
         m_cJumpSound.clip.LoadAudioData();
+        m_cHitSound.clip.LoadAudioData();
     }
 
     public void PlayerMove(InputAction.CallbackContext context)
@@ -88,7 +91,12 @@ public class PlayerCharacter : CharacterBase
         }
         
         // Feet
-        m_bFeetOnFloor = feet1.IsTouchingLayers() || feet2.IsTouchingLayers();
+        var newFeetOnFloor = feet1.IsTouchingLayers() || feet2.IsTouchingLayers();
+        if (!m_bFeetOnFloor && newFeetOnFloor)
+        {
+            m_cHitSound.Play();
+        }
+        m_bFeetOnFloor = newFeetOnFloor;
         
         // Animation
         base.Update();
