@@ -149,12 +149,7 @@ public class PlayerCharacter : CharacterBase
         if (!m_bFeetOnFloor && newFeetOnFloor)
         {
             m_cHitGroundSound.Play();
-
-            // Re-enable input once stun finished
-            if (m_cRigidBody.velocity.magnitude < 0.01f)
-            {
-                m_bStunned = false;
-            }
+            m_bJump = false;
         }
         m_bFeetOnFloor = newFeetOnFloor;
 
@@ -171,6 +166,12 @@ public class PlayerCharacter : CharacterBase
         if (jumpStopper1.IsTouchingLayers() || jumpStopper2.IsTouchingLayers())
         {
             m_bJump = false;
+        }
+        
+        // Re-enable input once stun finished
+        if (!m_bJump && m_cRigidBody.velocity.magnitude < 0.025f)
+        {
+            m_bStunned = false;
         }
         
         // Animation
