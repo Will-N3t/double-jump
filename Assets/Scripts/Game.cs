@@ -138,6 +138,7 @@ public class Game : MonoBehaviour
         {
             // Base track
             case TrackType.A:
+                return 0.45f;
                 //Get louder until level 5
                 if (level <= 5)
                 {
@@ -167,10 +168,10 @@ public class Game : MonoBehaviour
                 
                 // Fade out after level 7
                 if (level > 7)
-                    return Math.Max(0f, 0.5f - (0.2f * (level-7))); // Min 0
+                    return Math.Max(0f, 0.6f - (0.2f * (level-7))); // Min 0
                 
                 // Mix between level 3 and 7
-                return Math.Min(0.6f, 0.5f + (0.03f * (level-3))); // Max 0.6f
+                return Math.Min(0.6f, 0.6f + (0.03f * (level-3))); // Max 0.7f
 
             // Eerie 1
             case TrackType.C:

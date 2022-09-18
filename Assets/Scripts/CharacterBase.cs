@@ -18,10 +18,12 @@ public class CharacterBase : LivingThing
     [SerializeField] private Sprite m_cWalkSprite;
     [SerializeField] private Sprite m_cJumpSprite;
     [SerializeField] private Sprite m_cFallSprite;
+    [SerializeField] private Sprite m_cStunSprite;
 
     protected bool m_bJumping = false;
     protected bool m_bFalling = false;
     protected bool m_bWalking = false;
+    protected bool m_bStunned = false;
     
     // Start is called before the first frame update
     void Start()
@@ -70,7 +72,13 @@ public class CharacterBase : LivingThing
             m_bWalking = false;
         }
 
-        if (!m_bFalling && !m_bJumping && !m_bWalking)
+        // Stun
+        if (m_bStunned)
+        {
+            m_cSprite.sprite = m_cStunSprite;
+        }
+
+        if (!m_bFalling && !m_bJumping && !m_bWalking && !m_bStunned)
         {
             m_cSprite.sprite = m_cNormalSprite;
         }
