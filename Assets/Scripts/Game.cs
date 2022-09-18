@@ -36,8 +36,9 @@ public class Game : MonoBehaviour
     private Rigidbody2D m_cPlayerBody;
     
     private int m_iLevel = 0;
-
-    private int m_iLevelSize = 10;
+    
+    [SerializeField] 
+    private float m_fLevelSize = 9.5f;
 
     private bool m_bReady = false;
     
@@ -91,7 +92,7 @@ public class Game : MonoBehaviour
         if (m_iLevel != GetLevelFromPosition())
         {
             m_iLevel = GetLevelFromPosition();
-            m_cCamera.transform.SetPositionAndRotation(new Vector3(0, m_iLevel*m_iLevelSize, -10), Quaternion.identity);
+            m_cCamera.transform.SetPositionAndRotation(new Vector3(0, (m_iLevel-1)*m_fLevelSize, -10), Quaternion.identity);
 
             m_cLevelText.text = $"Level: {m_iLevel}";
         }
@@ -264,6 +265,6 @@ public class Game : MonoBehaviour
     /// <returns>Returns the level</returns>
     private int GetLevelFromPosition()
     {
-        return Mathf.FloorToInt((m_cPlayerBody.position.y + (m_iLevelSize/2f)) / m_iLevelSize);
+        return Mathf.FloorToInt(1 + (m_cPlayerBody.position.y + (m_fLevelSize/2f)) / m_fLevelSize);
     }
 }
