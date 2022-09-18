@@ -10,10 +10,14 @@ public class PlayerCharacter : CharacterBase
     private Vector2 m_vMovement = Vector2.zero;
 
     [SerializeField]
-    private float m_fJumpForce = 4f;
+    private float m_fJumpForce = 500000f;
     
     [SerializeField]
     private bool m_bDisableInputOnBumpHead = true;
+    [SerializeField]
+    private CapsuleCollider2D jumpStopper1;
+    [SerializeField]
+    private CapsuleCollider2D jumpStopper2;
     [SerializeField]
     private CapsuleCollider2D head1;
     [SerializeField]
@@ -24,6 +28,9 @@ public class PlayerCharacter : CharacterBase
     [SerializeField]
     private CapsuleCollider2D feet2;
 
+    [SerializeField]
+    private float m_fMaxJumpTime = 1f;
+    private float m_fJumpTime = 0f;
     [SerializeField]
     private float m_fMaxJumpHeight = 3f;
     [SerializeField]
@@ -58,6 +65,7 @@ public class PlayerCharacter : CharacterBase
         {
             m_cJumpSound.Play();
             m_bJump = true;
+            m_fJumpTime = m_fMaxJumpTime;
             m_fJumpStartHeight = m_cRigidBody.position.y;
         }
 
@@ -83,7 +91,7 @@ public class PlayerCharacter : CharacterBase
         // Add movement force
         if (!m_bStunned)
         {
-            m_cRigidBody.AddForce(Vector2.right * (m_fMoveSpeed * m_vMovement.x));
+            m_cRigidBody.AddForce(Vector2.right * (m_fMoveSpeed * m_vMovement.x) * Time.deltaTime);
         }
         
         // Add jump force
@@ -92,7 +100,6 @@ public class PlayerCharacter : CharacterBase
             // Manage being stunned
             if (m_bStunned)
             {
-                Debug.Log("End Jump (Stunned)");
                 m_bJump = false;
                 return;
             }
@@ -100,7 +107,6 @@ public class PlayerCharacter : CharacterBase
             // Jump for a minimum amount
             if (!m_bJumpPressed && (m_cRigidBody.position.y > (m_fJumpStartHeight + m_fMinJumpHeight)))
             {
-                Debug.Log("End Jump (Early Release)");
                 m_bJump = false;
                 return;
             }
@@ -108,26 +114,38 @@ public class PlayerCharacter : CharacterBase
             // End jump at max height
             if (m_cRigidBody.position.y >= m_fJumpStartHeight + m_fMaxJumpHeight)
             {
-                Debug.Log("End Jump (Max Height)");
+                m_bJump = false;
+                return;
+            }
+
+            // End jump after max time to stop floating
+            m_fJumpTime -= Time.deltaTime;
+            if (m_fJumpTime <= 0f)
+            {
+                Debug.Log("Hit max jump time");
                 m_bJump = false;
                 return;
             }
             
             // Add force to get close to jump height
-            //Debug.Log($"Jumping with power: [{m_fJumpForce * Square((m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight))/m_fMaxJumpHeight)}] = m_fJumpForce[{m_fJumpForce}] * SQR((m_fMaxJumpHeight[{m_fMaxJumpHeight}] - (m_cRigidBody.position.y[{m_cRigidBody.position.y}] - m_fJumpStartHeight[{m_fJumpStartHeight}])[{m_cRigidBody.position.y - m_fJumpStartHeight}] )[{m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight)}] / m_fMaxJumpHeight[{m_fMaxJumpHeight}] )[{(m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight))/m_fMaxJumpHeight}] )[{Square(((m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight))/m_fMaxJumpHeight))}]");
-            var jumpPower = Square((m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight)) / m_fMaxJumpHeight);
+            var jumpPower = Power((m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight)) / (m_fMaxJumpHeight*3));
             
-            Debug.Log($"Jump Power: {jumpPower}");
+            //Debug.Log($"Jump Power: {jumpPower}");
             m_cRigidBody.AddForce(Vector3.up * m_fJumpForce * jumpPower * Time.deltaTime);
         }
 
-        float Square(float number)
+        float Power(float number, uint power = 2)
         {
-            return number * number * number;
+            for (int i = 0; i < power; i++)
+            {
+                number *= number;
+            }
+            
+            return number;
         }
         
         // Feet
-        var newFeetOnFloor = feet1.IsTouchingLayers() || feet2.IsTouchingLayers();
+        var newFeetOnFloor = (feet1.IsTouchingLayers() && !feet1.IsTouchingLayers(2)) || (feet2.IsTouchingLayers() && !feet1.IsTouchingLayers(2));
         if (!m_bFeetOnFloor && newFeetOnFloor)
         {
             m_cHitGroundSound.Play();
@@ -147,6 +165,12 @@ public class PlayerCharacter : CharacterBase
             m_cHitHeadSound.Play();
             m_bJump = false;
             m_vMovement = Vector2.zero;
+        }
+        
+        // Stop Jump
+        if (jumpStopper1.IsTouchingLayers() || jumpStopper2.IsTouchingLayers())
+        {
+            m_bJump = false;
         }
         
         // Animation

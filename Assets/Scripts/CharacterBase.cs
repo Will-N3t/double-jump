@@ -6,7 +6,7 @@ public class CharacterBase : LivingThing
 {
 
     [SerializeField]
-    protected float m_fMoveSpeed = 0.5f;
+    protected float m_fMoveSpeed = 100f;
     
     [SerializeField]
     protected Rigidbody2D m_cRigidBody;

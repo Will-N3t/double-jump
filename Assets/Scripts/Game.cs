@@ -162,16 +162,16 @@ public class Game : MonoBehaviour
 
             // First adventure
             case TrackType.B:
-                // Don't turn up until level 3
-                if (level < 3)
+                // Don't turn up until level 2
+                if (level < 2)
                     return 0f;
                 
                 // Fade out after level 7
                 if (level > 7)
                     return Math.Max(0f, 0.6f - (0.2f * (level-7))); // Min 0
                 
-                // Mix between level 3 and 7
-                return Math.Min(0.6f, 0.6f + (0.03f * (level-3))); // Max 0.7f
+                // Mix between level 2 and 7
+                return Math.Min(0.6f, 0.6f + (0.03f * (level-2))); // Max 0.7f
 
             // Eerie 1
             case TrackType.C:
