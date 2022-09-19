@@ -280,7 +280,7 @@ public class Game : MonoBehaviour
     /// </summary>
     public void TriggerWin()
     {
-        m_cWinText.ac = true;
+        m_cWinText.enabled = true;
         m_cPlayerComponent.enabled = false;
     }
 }
