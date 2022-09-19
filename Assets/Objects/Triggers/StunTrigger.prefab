@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1270022451983363863}
   - component: {fileID: 8335479796770667449}
   m_Layer: 0
-  m_Name: NewZoneTrigger
+  m_Name: StunTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
