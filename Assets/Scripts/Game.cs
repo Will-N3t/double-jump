@@ -167,12 +167,12 @@ public class Game : MonoBehaviour
                 if (level < 3)
                     return 0f;
                 
-                // Fade out after level 7
-                if (level > 7)
-                    return Math.Max(0f, 0.6f - (0.2f * (level-7))); // Min 0
+                // Fade out after level 8
+                if (level > 8)
+                    return Math.Max(0f, 0.6f - (0.15f * (level-8))); // Min 0
                 
-                // Mix between level 3 and 7
-                return Math.Min(0.7f, 0.6f + (0.3f * (level-3))); // Max 0.7f
+                // Mix between level 3 and 8
+                return Math.Min(0.7f, 0.6f + (0.05f * (level-3))); // Max 0.7f
 
             // Eerie 1
             case TrackType.C:
@@ -180,12 +180,12 @@ public class Game : MonoBehaviour
                 if (level <= 6)
                     return 0f;
                 
-                // Fade out after level 11
-                if (level > 11)
-                    return Math.Max(0f, 0.5f - (0.2f * (level-11))); // Min 0
+                // Fade out after level 9
+                if (level > 9)
+                    return Math.Max(0f, 0.5f - (0.2f * (level-9))); // Min 0
                 
-                // Mix between level 6 and 11
-                return Math.Min(0.6f, 0.5f + (0.03f * (level-6))); // Max 0.6f
+                // Mix between level 6 and 9
+                return Math.Min(0.55f, 0.4f + (0.04f * (level-6))); // Max 0.6f
 
             // Eerie 2
             case TrackType.D:

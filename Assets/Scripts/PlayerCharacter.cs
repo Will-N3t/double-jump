@@ -8,6 +8,8 @@ using UnityEngine.Serialization;
 public class PlayerCharacter : CharacterBase
 {
     private Vector2 m_vMovement = Vector2.zero;
+    private string StunTag = "Stun";
+    private int NoJumpLayer = 2;
 
     [SerializeField]
     private float m_fNormalMass = 1f;
@@ -67,6 +69,21 @@ public class PlayerCharacter : CharacterBase
     private AudioSource m_cHitGroundSound;
     
 
+    /// <summary>
+    /// Basic movement input function
+    /// Method triggered by input controller
+    /// </summary>
+    /// <param name="context"></param>
+    public void PlayerMove(InputAction.CallbackContext context)
+    {
+        m_vMovement = context.ReadValue<Vector2>();
+    }
+
+    /// <summary>
+    /// Jump function
+    /// Method triggered by input controller
+    /// </summary>
+    /// <param name="context">Input context</param>
     public void Jump(InputAction.CallbackContext context)
     {
         bool jumpButton = context.ReadValueAsButton();
@@ -93,11 +110,11 @@ public class PlayerCharacter : CharacterBase
         m_cHitGroundSound.clip.LoadAudioData();
     }
 
-    public void PlayerMove(InputAction.CallbackContext context)
-    {
-        m_vMovement = context.ReadValue<Vector2>();
-    }
-
+    /// <summary>
+    /// Override method for customising behaviour on stun
+    /// Triggered by parent class detection of stun / unstun of <code>m_bStunned</code> value
+    /// </summary>
+    /// <param name="stun">The new stun value passed in</param>
     protected override void SwitchStun(bool stun)
     {
         Debug.Log($"Stun: {stun}");
@@ -116,6 +133,34 @@ public class PlayerCharacter : CharacterBase
         
         // Physics
         m_cRigidBody.mass = stun ? m_fStunMass : m_fNormalMass;
+    }
+    
+    /// <summary>
+    /// Power function
+    /// Basically Mathf.Pow
+    /// </summary>
+    /// <param name="number">Number to power</param>
+    /// <param name="power">Power to reach</param>
+    /// <returns>Number to the Power</returns>
+    static float Power(float number, uint power = 2)
+    {
+        for (int i = 0; i < power; i++)
+        {
+            number *= number;
+        }
+
+        return number;
+    }
+
+    /// <summary>
+    /// Exponentially tweens a multiplier value down as it reaches its target
+    /// </summary>
+    /// <param name="current"></param>
+    /// <param name="target"></param>
+    /// <returns>0 - 1 multiplier</returns>
+    static float ForceMultiplierToTarget(float current, float target)
+    {
+        return Mathf.Pow((target - current) / (target*3), 2);
     }
     
     // Update is called once per frame
@@ -179,25 +224,28 @@ public class PlayerCharacter : CharacterBase
             
             m_cRigidBody.AddForce(Vector3.up * m_fJumpForce * jumpPower * Time.deltaTime);
         }
-
-        float Power(float number, uint power = 2)
-        {
-            for (int i = 0; i < power; i++)
-            {
-                number *= number;
-            }
-
-            return number;
-        }
-
-        
-        static float ForceMultiplierToTarget(float current, float target)
-        {
-            return Mathf.Pow((target - current) / (target*3), 2);
-        }
         
         // Feet
-        var newFeetOnFloor = (feet1.IsTouchingLayers() && !feet1.IsTouchingLayers(2)) || (feet2.IsTouchingLayers() && !feet1.IsTouchingLayers(2));
+        bool newFeetOnFloor = false;
+        var contacts1 = new List<Collider2D>(2);
+        var contacts2 = new List<Collider2D>(2);
+        var numContacts1 = feet1.GetContacts(contacts1);
+        var numContacts2 = feet2.GetContacts(contacts2);
+        for (int i = 0; i < numContacts1; i++)
+        {
+            if (contacts1[i] != null && contacts1[i].gameObject.layer != NoJumpLayer)
+            {
+                newFeetOnFloor = true;
+            }
+        }
+        for (int i = 0; i < numContacts2; i++)
+        {
+            if (contacts2[i] != null && contacts2[i].gameObject.layer != NoJumpLayer)
+            {
+                newFeetOnFloor = true;
+            }
+        }
+        
         if (!m_bFeetOnFloor && newFeetOnFloor)
         {
             m_cHitGroundSound.Play();
@@ -205,6 +253,7 @@ public class PlayerCharacter : CharacterBase
         }
         m_bFeetOnFloor = newFeetOnFloor;
 
+        
         // Bump Head
         if (!m_bStunned && m_bDisableInputOnBumpHead && (head1.IsTouchingLayers() || head2.IsTouchingLayers()))
         {
@@ -214,11 +263,13 @@ public class PlayerCharacter : CharacterBase
             m_vMovement = Vector2.zero;
         }
         
+        
         // Stop Jump
         if (jumpStopper1.IsTouchingLayers() || jumpStopper2.IsTouchingLayers())
         {
             m_bJump = false;
         }
+        
         
         // Re-enable input once stun finished
         if (!m_bJump && m_cRigidBody.velocity.magnitude < 0.025f)
@@ -226,9 +277,22 @@ public class PlayerCharacter : CharacterBase
             m_bStunned = false;
         }
         
+        
         // Animation
         base.Update();
         m_cMirrorSprite.sprite = m_cSprite.sprite;
         m_cMirrorSprite.flipX = m_cSprite.flipX;
+    }
+    
+    /// <summary>
+    /// Deal with triggers
+    /// </summary>
+    /// <param name="other">The trigger touched</param>
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag(StunTag))
+        {
+            m_bStunned = true;
+        }
     }
 }
