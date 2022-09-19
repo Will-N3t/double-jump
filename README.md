@@ -25,3 +25,6 @@ Fight your way to the top to confront and defeat your other-worldly doppleganger
 **Environment Sprites:** [KnoblePersona](https://opengameart.org/content/jungle-dirt-background-connecting-tileset-16x16)
 
 **Background Art:** Will Chapman
+
+
+![Screenshot 2022-09-19 at 7 32 18 AM](https://user-images.githubusercontent.com/107442851/191042687-9336f0b0-9d5e-406a-b5b5-97b9b53f4fed.png)
