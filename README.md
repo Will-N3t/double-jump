@@ -17,10 +17,19 @@ There are 20 levels, in an ideal world this would be somewhere between 50 and 10
 
 **Jump:** W | Up Arrow | Space Bar | South Face Button
 
-## Builds
+## Builds / How To Play
 Releases can be accessed under the builds folder [here](https://github.com/Will-N3t/double-jump/tree/main/Builds).
 
 Alternatively, access the releases on GitHub [here](https://github.com/Will-N3t/double-jump/tags)
+
+If a build won't work for you on Mac because of security reasons (screw you apple and your signing and your certificates), you can pretty easily build and run the game from Unity. It's very lightweight and should only take 20 seconds or so depending on your machine.
+1. Clone this repo
+2. Open it as a project in Unity (Unity version for this project is 2021.3.9f1, anything close should realistically do)
+3. Go to File -> Build Settings
+4. Target your platform
+5. Hit build + run
+![Screenshot 2022-09-19 at 2 24 09 PM](https://user-images.githubusercontent.com/107442851/191122794-ff66c9d8-c3e4-4f37-bec8-ba1a63ec56d9.png)
+
 
 
 ## Credits:
