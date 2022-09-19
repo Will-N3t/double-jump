@@ -22,26 +22,26 @@ public class PlayerCharacter : CharacterBase
     [SerializeField]
     private bool m_bDisableInputOnBumpHead = true;
     [SerializeField]
-    private CapsuleCollider2D jumpStopper1;
+    private Collider2D jumpStopper1;
     [SerializeField]
-    private CapsuleCollider2D jumpStopper2;
+    private Collider2D jumpStopper2;
     [SerializeField]
-    private CapsuleCollider2D stunCollider1;
+    private Collider2D stunCollider1;
     [SerializeField]
-    private CapsuleCollider2D stunCollider2;
+    private Collider2D stunCollider2;
     [SerializeField]
-    private CapsuleCollider2D mainCollider1;
+    private Collider2D mainCollider1;
     [SerializeField]
-    private CapsuleCollider2D mainCollider2;
+    private Collider2D mainCollider2;
     [SerializeField]
-    private CapsuleCollider2D head1;
+    private Collider2D head1;
     [SerializeField]
-    private CapsuleCollider2D head2;
+    private Collider2D head2;
     
     [SerializeField]
-    private CapsuleCollider2D feet1;
+    private Collider2D feet1;
     [SerializeField]
-    private CapsuleCollider2D feet2;
+    private Collider2D feet2;
 
     [SerializeField]
     private float m_fMaxJumpTime = 1f;
@@ -67,6 +67,10 @@ public class PlayerCharacter : CharacterBase
     private AudioSource m_cHitHeadSound;
     [SerializeField]
     private AudioSource m_cHitGroundSound;
+    [SerializeField]
+    private AudioSource m_cStunnedHitGroundSound;
+    [SerializeField]
+    private AudioSource m_cSlipSound;
     
 
     /// <summary>
@@ -166,29 +170,11 @@ public class PlayerCharacter : CharacterBase
     // Update is called once per frame
     new void Update()
     {
-        // Add movement force
-        if (!m_bStunned)
-        {
-            m_cRigidBody.mass = m_fNormalMass;
-            
-            var movePower = ForceMultiplierToTarget(Mathf.Abs(m_cRigidBody.velocity.x), m_fMaxMoveSpeed);
-            m_cRigidBody.AddForce(Vector2.right * m_vMovement.x * m_fMoveAcceleration * movePower * Time.deltaTime);
-        }
-        else
-        {
-            // Stun physics
-            m_cRigidBody.mass = m_fStunMass;
-            
-            if (feet1.IsTouchingLayers() || feet2.IsTouchingLayers())
-            {
-                m_cHitGroundSound.Play();
-            }
-        }
         
         // Add jump force
         if (m_bJump)
         {
-            // Manage being stunned
+            // Stop jump if stunned
             if (m_bStunned)
             {
                 m_bJump = false;
@@ -213,7 +199,6 @@ public class PlayerCharacter : CharacterBase
             m_fJumpTime -= Time.deltaTime;
             if (m_fJumpTime <= 0f)
             {
-                Debug.Log("Hit max jump time");
                 m_bJump = false;
                 return;
             }
@@ -224,27 +209,32 @@ public class PlayerCharacter : CharacterBase
             
             m_cRigidBody.AddForce(Vector3.up * m_fJumpForce * jumpPower * Time.deltaTime);
         }
-        
+
         // Feet
+        void CheckFeet(int numContacts, ref List<Collider2D> contacts, ref bool feetOnFloor)
+        {
+            for (int i = 0; i < numContacts; i++)
+            {
+                if (contacts[i] != null && contacts[i].gameObject.layer != NoJumpLayer)
+                {
+                    feetOnFloor = true;
+                }
+                // Slip on slope
+                else if (contacts[i] != null)
+                {
+                    m_cSlipSound.Play();
+                    m_bStunned = true;
+                }
+            }
+        }
+        
         bool newFeetOnFloor = false;
         var contacts1 = new List<Collider2D>(2);
         var contacts2 = new List<Collider2D>(2);
         var numContacts1 = feet1.GetContacts(contacts1);
         var numContacts2 = feet2.GetContacts(contacts2);
-        for (int i = 0; i < numContacts1; i++)
-        {
-            if (contacts1[i] != null && contacts1[i].gameObject.layer != NoJumpLayer)
-            {
-                newFeetOnFloor = true;
-            }
-        }
-        for (int i = 0; i < numContacts2; i++)
-        {
-            if (contacts2[i] != null && contacts2[i].gameObject.layer != NoJumpLayer)
-            {
-                newFeetOnFloor = true;
-            }
-        }
+        CheckFeet(numContacts1, ref contacts1, ref newFeetOnFloor);
+        CheckFeet(numContacts2, ref contacts2, ref newFeetOnFloor);
         
         if (!m_bFeetOnFloor && newFeetOnFloor)
         {
@@ -272,9 +262,31 @@ public class PlayerCharacter : CharacterBase
         
         
         // Re-enable input once stun finished
-        if (!m_bJump && m_cRigidBody.velocity.magnitude < 0.025f)
+        if (m_bStunned && (stunCollider1.IsTouchingLayers() || stunCollider2.IsTouchingLayers()) && m_cRigidBody.velocity.magnitude < 0.005f)
         {
+            Debug.Log("Out of Stun!");
             m_bStunned = false;
+            m_cStunnedHitGroundSound.Play();
+        }
+        
+        
+        // Add movement force
+        if (!m_bStunned)
+        {
+            
+            // Don't add movement power if the main body is touching something but the feet aren't
+            if (!(!m_bFeetOnFloor && (mainCollider1.IsTouchingLayers() || mainCollider2.IsTouchingLayers())))
+            {
+                var movePower = ForceMultiplierToTarget(Mathf.Abs(m_cRigidBody.velocity.x), m_fMaxMoveSpeed);
+                m_cRigidBody.AddForce(Vector2.right * m_vMovement.x * m_fMoveAcceleration * movePower * Time.deltaTime);
+            }
+        }
+        else
+        {
+            if (feet1.IsTouchingLayers() || feet2.IsTouchingLayers())
+            {
+                m_cHitGroundSound.Play();
+            }
         }
         
         
