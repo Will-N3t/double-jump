@@ -10,6 +10,11 @@ public class PlayerCharacter : CharacterBase
     private Vector2 m_vMovement = Vector2.zero;
 
     [SerializeField]
+    private float m_fNormalMass = 1f;
+    [SerializeField]
+    private float m_fStunMass = 0f;
+    
+    [SerializeField]
     private float m_fJumpForce = 500000f;
     
     [SerializeField]
@@ -18,6 +23,14 @@ public class PlayerCharacter : CharacterBase
     private CapsuleCollider2D jumpStopper1;
     [SerializeField]
     private CapsuleCollider2D jumpStopper2;
+    [SerializeField]
+    private CapsuleCollider2D stunCollider1;
+    [SerializeField]
+    private CapsuleCollider2D stunCollider2;
+    [SerializeField]
+    private CapsuleCollider2D mainCollider1;
+    [SerializeField]
+    private CapsuleCollider2D mainCollider2;
     [SerializeField]
     private CapsuleCollider2D head1;
     [SerializeField]
@@ -85,13 +98,46 @@ public class PlayerCharacter : CharacterBase
         m_vMovement = context.ReadValue<Vector2>();
     }
 
+    protected override void SwitchStun(bool stun)
+    {
+        Debug.Log($"Stun: {stun}");
+        
+        // Colliders
+        stunCollider1.enabled = stun;
+        stunCollider2.enabled = stun;
+        mainCollider1.enabled = !stun;
+        mainCollider2.enabled = !stun;
+        jumpStopper1.enabled = !stun;
+        jumpStopper2.enabled = !stun;
+        head1.enabled = !stun;
+        head2.enabled = !stun;
+        feet1.enabled = !stun;
+        feet2.enabled = !stun;
+        
+        // Physics
+        m_cRigidBody.mass = stun ? m_fStunMass : m_fNormalMass;
+    }
+    
     // Update is called once per frame
     new void Update()
     {
         // Add movement force
         if (!m_bStunned)
         {
-            m_cRigidBody.AddForce(Vector2.right * (m_fMoveSpeed * m_vMovement.x) * Time.deltaTime);
+            m_cRigidBody.mass = m_fNormalMass;
+            
+            var movePower = ForceMultiplierToTarget(Mathf.Abs(m_cRigidBody.velocity.x), m_fMaxMoveSpeed);
+            m_cRigidBody.AddForce(Vector2.right * m_vMovement.x * m_fMoveAcceleration * movePower * Time.deltaTime);
+        }
+        else
+        {
+            // Stun physics
+            m_cRigidBody.mass = m_fStunMass;
+            
+            if (feet1.IsTouchingLayers() || feet2.IsTouchingLayers())
+            {
+                m_cHitGroundSound.Play();
+            }
         }
         
         // Add jump force
@@ -128,9 +174,9 @@ public class PlayerCharacter : CharacterBase
             }
             
             // Add force to get close to jump height
+            
             var jumpPower = Power((m_fMaxJumpHeight - (m_cRigidBody.position.y - m_fJumpStartHeight)) / (m_fMaxJumpHeight*3));
             
-            //Debug.Log($"Jump Power: {jumpPower}");
             m_cRigidBody.AddForce(Vector3.up * m_fJumpForce * jumpPower * Time.deltaTime);
         }
 
@@ -140,8 +186,14 @@ public class PlayerCharacter : CharacterBase
             {
                 number *= number;
             }
-            
+
             return number;
+        }
+
+        
+        static float ForceMultiplierToTarget(float current, float target)
+        {
+            return Mathf.Pow((target - current) / (target*3), 2);
         }
         
         // Feet

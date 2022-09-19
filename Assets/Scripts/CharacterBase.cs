@@ -6,7 +6,9 @@ public class CharacterBase : LivingThing
 {
 
     [SerializeField]
-    protected float m_fMoveSpeed = 100f;
+    protected float m_fMaxMoveSpeed = 1f;
+    [SerializeField]
+    protected float m_fMoveAcceleration = 100f;
     
     [SerializeField]
     protected Rigidbody2D m_cRigidBody;
@@ -23,6 +25,7 @@ public class CharacterBase : LivingThing
     protected bool m_bJumping = false;
     protected bool m_bFalling = false;
     protected bool m_bWalking = false;
+    private bool m_bOldStunned = false;
     protected bool m_bStunned = false;
     
     // Start is called before the first frame update
@@ -31,6 +34,8 @@ public class CharacterBase : LivingThing
         
     }
 
+    protected virtual void SwitchStun(bool stun){}
+    
     // Update is called once per frame
     protected void Update()
     {
@@ -73,6 +78,12 @@ public class CharacterBase : LivingThing
         }
 
         // Stun
+        if (m_bStunned != m_bOldStunned)
+        {
+            m_bOldStunned = m_bStunned;
+            SwitchStun(m_bStunned);
+        }
+        
         if (m_bStunned)
         {
             m_cSprite.sprite = m_cStunSprite;
