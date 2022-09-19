@@ -22,6 +22,8 @@ Releases can be accessed under the builds folder [here](https://github.com/Will-
 
 Alternatively, access the releases on GitHub [here](https://github.com/Will-N3t/double-jump/tags)
 
+##### I Highly Recommend Using The [WebGL (Browser) Version](https://github.com/Will-N3t/double-jump/releases/tag/WebGL(Browser))
+
 If a build won't work for you on Mac because of security reasons (screw you apple and your signing and your certificates), you can pretty easily build and run the game from Unity. It's very lightweight and should only take 20 seconds or so depending on your machine.
 1. Clone this repo
 2. Open it as a project in Unity (Unity version for this project is 2021.3.9f1, anything close should realistically do)
