@@ -28,6 +28,7 @@ If a build won't work for you on Mac because of security reasons (screw you appl
 3. Go to File -> Build Settings
 4. Target your platform
 5. Hit build + run
+
 ![Screenshot 2022-09-19 at 2 24 09 PM](https://user-images.githubusercontent.com/107442851/191122794-ff66c9d8-c3e4-4f37-bec8-ba1a63ec56d9.png)
 
 
