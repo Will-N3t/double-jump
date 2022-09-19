@@ -20,6 +20,8 @@ There are 20 levels, in an ideal world this would be somewhere between 50 and 10
 ## Builds
 Releases can be accessed under the builds folder [here](https://github.com/Will-N3t/double-jump/tree/main/Builds).
 
+Alternatively, access the releases on GitHub [here](https://github.com/Will-N3t/double-jump/tags)
+
 
 ## Credits:
 ### Programming:
