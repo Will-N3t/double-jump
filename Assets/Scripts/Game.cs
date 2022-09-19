@@ -10,8 +10,10 @@ public class Game : MonoBehaviour
     [SerializeField] private Camera m_cCamera;
     [SerializeField] private TextMeshProUGUI m_cLevelText;
     [SerializeField] private TextMeshProUGUI m_cMusicText;
+    [SerializeField] private TextMeshProUGUI m_cWinText;
     [SerializeField] private GameObject m_cPlayerObject;
     [SerializeField] private PlayerCharacter m_cPlayerComponent;
+    [SerializeField] private GameObject m_cEnemyObject;
     [SerializeField] private float m_fMusicFadeFactor = 1f;
     [SerializeField] private float m_fDEBUGPitchOverride = 0f;
     [SerializeField] private AudioSource m_cMusicA;
@@ -78,6 +80,7 @@ public class Game : MonoBehaviour
         m_cMusicG.Play();
 
         m_cPlayerBody = m_cPlayerObject.GetComponent<Rigidbody2D>();
+        m_cEnemyObject.SetActive(false);
 
         m_bReady = true;
     }
@@ -89,9 +92,12 @@ public class Game : MonoBehaviour
             return;
         
         // Update Cam
-        if (m_iLevel != GetLevelFromPosition())
+        if (m_iLevel != GetLevelFromPosition() && GetLevelFromPosition() <= 20)
         {
             m_iLevel = GetLevelFromPosition();
+            
+            m_cEnemyObject.SetActive(m_iLevel == 20);
+            
             m_cCamera.transform.SetPositionAndRotation(new Vector3(0, (m_iLevel-1)*m_fLevelSize, -10), Quaternion.identity);
 
             m_cLevelText.text = $"Level: {m_iLevel}";
@@ -101,20 +107,20 @@ public class Game : MonoBehaviour
         m_cMusicA.volume = Fade(m_cMusicA.volume, GetVolumeForTrackAndLevel(TrackType.A, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicB.volume = Fade(m_cMusicB.volume, GetVolumeForTrackAndLevel(TrackType.B, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicC.volume = Fade(m_cMusicC.volume, GetVolumeForTrackAndLevel(TrackType.C, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
-        m_cMusicD.volume = Fade(m_cMusicD.volume, GetVolumeForTrackAndLevel(TrackType.D, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
+        //m_cMusicD.volume = Fade(m_cMusicD.volume, GetVolumeForTrackAndLevel(TrackType.D, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicE.volume = Fade(m_cMusicE.volume, GetVolumeForTrackAndLevel(TrackType.E, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
-        m_cMusicF.volume = Fade(m_cMusicF.volume, GetVolumeForTrackAndLevel(TrackType.F, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
+        //m_cMusicF.volume = Fade(m_cMusicF.volume, GetVolumeForTrackAndLevel(TrackType.F, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicG.volume = Fade(m_cMusicG.volume, GetVolumeForTrackAndLevel(TrackType.G, m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
 
         m_cMusicA.pitch = Fade(m_cMusicA.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicB.pitch = Fade(m_cMusicB.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicC.pitch = Fade(m_cMusicC.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
-        m_cMusicD.pitch = Fade(m_cMusicD.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
+        //m_cMusicD.pitch = Fade(m_cMusicD.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicE.pitch = Fade(m_cMusicE.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
-        m_cMusicF.pitch = Fade(m_cMusicF.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
+        //m_cMusicF.pitch = Fade(m_cMusicF.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
         m_cMusicG.pitch = Fade(m_cMusicG.pitch, GetPitchForLevel(m_iLevel), Time.deltaTime * m_fMusicFadeFactor);
 
-        m_cMusicText.text = $"A: {Round2(m_cMusicA.volume)} | B: {Round2(m_cMusicB.volume)} | C : {Round2(m_cMusicC.volume)} | D : {Round2(m_cMusicD.volume)} | E : {Round2(m_cMusicE.volume)} | F : {Round2(m_cMusicF.volume)} | G : {Round2(m_cMusicG.volume)}";
+        //m_cMusicText.text = $"A: {Round2(m_cMusicA.volume)} | B: {Round2(m_cMusicB.volume)} | C : {Round2(m_cMusicC.volume)} | D : {Round2(m_cMusicD.volume)} | E : {Round2(m_cMusicE.volume)} | F : {Round2(m_cMusicF.volume)} | G : {Round2(m_cMusicG.volume)}";
     }
 
     string Round2(float value)
@@ -186,7 +192,7 @@ public class Game : MonoBehaviour
                 
                 // Mix between level 6 and 9
                 return Math.Min(0.55f, 0.4f + (0.04f * (level-6))); // Max 0.6f
-
+            
             // Eerie 2
             case TrackType.D:
                 // Don't turn up until level 10
@@ -199,6 +205,7 @@ public class Game : MonoBehaviour
                 
                 // Mix between level 10 and 14
                 return Math.Min(0.6f, 0.5f + (0.03f * (level-10))); // Max 0.6f
+
 
             // Overcome
             case TrackType.E:
@@ -221,10 +228,10 @@ public class Game : MonoBehaviour
                 
                 // Go a bit quieter after level 18
                 if (level > 18)
-                    return Math.Max(0.3f, 0.5f - (0.1f * (level-18))); // Min 0.3f
+                    return Math.Max(0.5f, 0.7f - (0.1f * (level-18))); // Min 0.5f
                 
                 // Increase in volume after level 15
-                return Math.Min(0.6f, 0.3f + (0.1f * (level-15))); // Max 0.6f
+                return Math.Min(0.7f, 0.5f + (0.1f * (level-15))); // Max 0.7f
 
             // Electric Guitar
             case TrackType.G:
@@ -233,7 +240,7 @@ public class Game : MonoBehaviour
                     return 0f;
                 
                 // Increase in volume at that point
-                return Math.Min(0.6f, 0.3f + (0.1f * (level-17))); // Max 0.6f
+                return Math.Min(0.8f, 0.5f + (0.1f * (level-17))); // Max 0.8f
         }
 
         return 1f;
@@ -266,5 +273,14 @@ public class Game : MonoBehaviour
     private int GetLevelFromPosition()
     {
         return Mathf.FloorToInt(1 + (m_cPlayerBody.position.y + (m_fLevelSize/2f)) / m_fLevelSize);
+    }
+
+    /// <summary>
+    /// Super basic win state
+    /// </summary>
+    public void TriggerWin()
+    {
+        m_cWinText.ac = true;
+        m_cPlayerComponent.enabled = false;
     }
 }
