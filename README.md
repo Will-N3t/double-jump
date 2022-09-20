@@ -4,6 +4,9 @@ There is no actual double jump. There are double worlds, tho. And they're not *q
 
 Fight your way to the top to confront and defeat your other-worldly doppleganger!
 
+## [Play Here](doublejump.n3twork.com)
+*(**Note:** Must be on company VPN)*
+
 ![Screenshot 2022-09-19 at 7 22 34 AM](https://user-images.githubusercontent.com/107442851/191040618-b9065a45-bd73-417e-8935-dbdf294b585f.png)
 
 ## Concept
@@ -18,6 +21,8 @@ There are 20 levels, in an ideal world this would be somewhere between 50 and 10
 **Jump:** W | Up Arrow | Space Bar | South Face Button
 
 ## Builds / How To Play
+**If you're on the company VPN, you can play it at: [doublejump.n3twork.com](doublejump.n3twork.com)**
+
 Releases can be accessed under the builds folder [here](https://github.com/Will-N3t/double-jump/tree/main/Builds).
 
 Alternatively, access the releases on GitHub [here](https://github.com/Will-N3t/double-jump/tags)
